@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Пятнашки</title>
+  <style>
+    body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        align-content: center;
+        justify-content: space-around;
+        height: 600px;
+    }
+    .puzzle-board {
+        display: flex;
+        flex-wrap: wrap;
+        width: 290px;
+        height: 310px;
+        margin: auto;
+        border: 1px solid #000;
+        padding: 5px;
+        justify-content: center;
+        align-items: center;
+    }
+    .puzzle-cell {
+      width: 60px;
+      height: 60px;
+      line-height: 60px;
+      text-align: center;
+      border: 1px solid #000;
+      font-size: 24px;
+      cursor: pointer;
+    }
+    .empty-cell {
+      background-color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <div id="puzzle-board" class="puzzle-board">
+    <div class="puzzle-cell">1</div>
+    <div class="puzzle-cell">2</div>
+    <div class="puzzle-cell">3</div>
+    <div class="puzzle-cell">4</div>
+    <div class="puzzle-cell">5</div>
+    <div class="puzzle-cell">6</div>
+    <div class="puzzle-cell">7</div>
+    <div class="puzzle-cell">8</div>
+    <div class="puzzle-cell">9</div>
+    <div class="puzzle-cell">10</div>
+    <div class="puzzle-cell">11</div>
+    <div class="puzzle-cell">12</div>
+    <div class="puzzle-cell">13</div>
+    <div class="puzzle-cell">14</div>
+    <div class="puzzle-cell">15</div>
+    <div class="puzzle-cell empty-cell"></div>
+  </div>
+  <div class="ans-div">
+    <button  id="btn-start">Запустить работу алгоритма</button>
+    <p>Результат: </p>
+  </div>
+
+  <script>
+    const puzzleBoard = document.getElementById("puzzle-board");
+    const btnStart = document.getElementById("btn-start");
+    const puzzleCells = puzzleBoard.getElementsByClassName("puzzle-cell");
+
+    let matrix = Array.from({ length: 4 }, () => Array(4).fill(0));;
+
+    let emptyCellIndex = 15;
+
+    function fillArray(matrix) {
+        for (let i = 0; i < puzzleCells.length; i++) {
+            const row = Math.floor(i / 4);
+            const col = i % 4;
+            console.log(i);
+            if (puzzleCells[i].classList.contains('empty-cell')) {
+                matrix[row][col] = null;
+            } else {
+                matrix[row][col] = parseInt(puzzleCells[i].textContent, 10);
+            }
+        }
+        console.log(matrix);
+    }
+    
+
+    function isValidMove(index) {
+      const row = Math.floor(emptyCellIndex / 4);
+      const col = emptyCellIndex % 4;
+      const rowDiff = Math.abs(Math.floor(index / 4) - row);
+      const colDiff = Math.abs(index % 4 - col);
+      return (rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1);
+    }
+
+    function swapCells(index) {
+      const emptyCell = puzzleCells[emptyCellIndex];
+      const clickedCell = puzzleCells[index];
+      const tempTextContent = emptyCell.textContent;
+      emptyCell.textContent = clickedCell.textContent;
+      clickedCell.textContent = tempTextContent;
+      emptyCell.classList.toggle("empty-cell");
+      clickedCell.classList.toggle("empty-cell");
+      emptyCellIndex = index;
+    }
+
+    puzzleBoard.addEventListener("click", function(event) {
+      if (event.target.classList.contains("puzzle-cell")) {
+        const index = Array.from(puzzleCells).indexOf(event.target);
+        if (isValidMove(index)) {
+          swapCells(index);
+        }
+      }
+    });
+    btnStart.addEventListener("click", function() {
+        fillArray(matrix);
+    });
+  </script>
+</body>
+</html>
