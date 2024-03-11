@@ -35,6 +35,13 @@
     .empty-cell {
       background-color: #fff;
     }
+
+    .ans-div {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
   </style>
 </head>
 <body>
@@ -58,30 +65,36 @@
   </div>
   <div class="ans-div">
     <button  id="btn-start">Запустить работу алгоритма</button>
-    <p>Результат: </p>
+    <p id="pos">Результат: </p>
+    <p id="res"></p>
   </div>
 
   <script>
     const puzzleBoard = document.getElementById("puzzle-board");
     const btnStart = document.getElementById("btn-start");
     const puzzleCells = puzzleBoard.getElementsByClassName("puzzle-cell");
+    const position = document.getElementById("pos");
+    const res = document.getElementById("res");
 
     let matrix = Array.from({ length: 4 }, () => Array(4).fill(0));;
-
+    const startMatrix = [[1, 2, 3, 4],
+                         [5, 6, 7, 8],
+                         [9, 10, 11, 12],
+                         [13, 14, 15, 0]];
     let emptyCellIndex = 15;
 
     function fillArray(matrix) {
         for (let i = 0; i < puzzleCells.length; i++) {
             const row = Math.floor(i / 4);
             const col = i % 4;
-            console.log(i);
             if (puzzleCells[i].classList.contains('empty-cell')) {
-                matrix[row][col] = null;
+                matrix[row][col] = 0;
             } else {
                 matrix[row][col] = parseInt(puzzleCells[i].textContent, 10);
             }
         }
         console.log(matrix);
+        return matrix;
     }
     
 
@@ -104,6 +117,127 @@
       emptyCellIndex = index;
     }
 
+    function rating(state, goal) {
+      let distance = 0;
+      for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+          let num = state[i][j];
+          if (num === 0) continue;
+          let targetRow = 0;
+          let targetCol = 0;
+          for (let k = 0; k < 3; k++) {
+            for (let l = 0; l < 3; l++) {
+              if (goal[k][l] === num) {
+                targetRow = k;
+                targetCol = l;
+                break;
+              }
+            }
+            if (targetRow !== 0 && targetCol !== 0) break;
+          }
+          distance += Math.abs(targetRow - i) + Math.abs(targetCol - j);
+        }
+      }
+      return distance;
+    }
+
+    function generateChildren(state, open, closed, goal) {
+    const zeroPosition = findZero(state.puzzle);
+    let directions = [
+        {row: -1, col: 0}, 
+        {row: 1, col: 0},  
+        {row: 0, col: -1}, 
+        {row: 0, col: 1}   
+    ];
+
+    const children = [];
+    directions.forEach(direction => {
+        const newRow = zeroPosition.row + direction.row;
+        const newCol = zeroPosition.col + direction.col;
+        if (newRow >= 0 && newRow < 4 && newCol >= 0 && newCol < 4) { 
+            const newPuzzle = swap(state, zeroPosition.row, zeroPosition.col, newRow, newCol);
+            if (!existsInArrays(newPuzzle, [open.map(o => o.puzzle), closed])) {
+                children.push(newPuzzle);
+            }
+        }
+    });
+    return children.map(puzzle => ({puzzle: puzzle, rating: rating(puzzle, goal)}));
+    }
+
+
+    function swap(state, zeroRow, zeroCol, targetRow, targetCol) {
+      let newPuzzle = state.puzzle.map(row => row.slice());
+      newPuzzle[zeroRow][zeroCol] = newPuzzle[targetRow][targetCol];
+      newPuzzle[targetRow][targetCol] = 0;
+      return newPuzzle;
+  }
+
+
+    function findZero(puzzle) {
+      for (let i = 0; i <= 3; i++) {
+        for (let j = 0; j <= 3; j++) {
+          console.log('puzzle[i][j]', puzzle[i][j]);
+          if (puzzle[i][j] == 0) {
+            return { row: i, col: j };
+          }
+        }
+      }
+    }
+
+    function greedy(start, goal) {
+        var open = [{puzzle: start, rating: rating(start, goal)}];
+        var closed = [];
+        while (open.length != 0) {
+            var current = open.shift().puzzle; 
+            if (stateToString(current) === stateToString(goal)) {
+                console.log('Решение найдено', closed);
+                showRes(closed, 'res');
+                //res.innerHTML = `Результат +: ` +`${closed}`;
+                return; 
+            }
+            closed.push(current); 
+
+            var children = generateChildren({puzzle: current}, open, closed, goal); 
+
+            children.forEach(child => {
+                if (!existsInArrays(child.puzzle, [open.map(o => o.puzzle), closed])) {
+                    insertSorted(child, open, goal);
+                }
+            });
+        }
+
+        console.log('Решение не найдено', closed, open);
+        res.textContent = `- Решение не найдено, closed - ${closed}, open - ${open}`;
+    }
+
+    function insertSorted(child, open, goal) {
+        let childRating = rating(child.puzzle, goal);
+        let index = open.findIndex(o => o.rating > childRating);
+        if (index === -1) {
+            open.push({puzzle: child.puzzle, rating: childRating});
+        } else {
+            open.splice(index, 0, {puzzle: child.puzzle, rating: childRating});
+        }
+    }
+
+    function existsInArrays(state, arrays) {
+        let stateStr = stateToString(state);
+        return arrays.some(array => array.some(element => stateToString(element) === stateStr));
+    }
+
+    function stateToString(state) {
+        return state.map(row => row.join('')).join('|');
+    }
+
+    function showRes(array, elementId) {
+      const formattedArray = array.map(row => '[' + row.join(',') + ']').join('\n');
+      //const formattedArray = array.map(row => row.map(inrow => inrow.join(',')).join('\n')).join('\n');
+      const displayElement = document.getElementById(elementId);
+      if (displayElement) {
+        displayElement.textContent = `+ Порождено потомков ${array.length}, сами потомки : ${formattedArray}`; 
+      }
+    }
+
     puzzleBoard.addEventListener("click", function(event) {
       if (event.target.classList.contains("puzzle-cell")) {
         const index = Array.from(puzzleCells).indexOf(event.target);
@@ -112,8 +246,12 @@
         }
       }
     });
+
     btnStart.addEventListener("click", function() {
-        fillArray(matrix);
+        matrix = fillArray(matrix);
+        console.log('Загаданная матрица', matrix);
+        position.innerHTML = `Загаданная позиция: `+`<pre>${matrix.map(row => `[${row}]`).join('\n')}</pre>`;
+        greedy(startMatrix, matrix);
     });
   </script>
 </body>
