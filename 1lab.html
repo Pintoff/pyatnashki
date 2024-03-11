@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div class="main">
+
+    </div>
+</body>
+<script>
+    var main = document.querySelector('.main');
+
+
+
+    var matrix = [
+    [0, 1, 1, 0, 0, 0, 0, 0, 0, 0], 
+    [1, 0, 1, 1, 1, 1, 0, 0, 0, 0], 
+    [1, 1, 0, 1, 0, 0, 0, 0, 0, 0], 
+    [0, 1, 1, 0, 1, 0, 0, 0, 0, 0], 
+    [0, 1, 0, 1, 0, 1, 0, 1, 0, 0],
+    [0, 1, 0, 0, 1, 0, 1, 1, 1, 0], 
+    [0, 0, 0, 0, 0, 1, 0, 0, 1, 1], 
+    [0, 0, 0, 0, 1, 1, 0, 0, 1, 0], 
+    [0, 0, 0, 0, 0, 1, 1, 1, 0, 1], 
+    [0, 0, 0, 0, 0, 0, 1, 0, 1, 0]
+];
+
+
+function search(matrix, start, end, isDepthFind) {
+    var open = [start];
+    var closed = [];
+    while (open.length != 0) {
+        var x = open.shift();
+        if (x == end) {
+            return closed;
+        } else {
+            closed.push(x);
+            for(let i = 0; i < matrix[x].length; i++) {
+                if ((matrix[x][i] == 1) && !(open.includes(i) || closed.includes(i))) {
+                    if (isDepthFind) {
+                        open.unshift(i);
+                    } else {
+                        open.push(i);
+                    }
+                } 
+            }
+
+        }
+    }
+    return null;
+}
+
+console.log(search(matrix, 0, 6, false));
+
+main.textContent = `matrix - ${matrix}, ответ ${search(matrix, 0, 6, false)}`;
+
+</script>
+</html>
