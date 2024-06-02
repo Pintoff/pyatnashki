@@ -34,6 +34,10 @@ function search(matrix, start, end, isDepthFind) {
     var closed = [];
     while (open.length != 0) {
         var x = open.shift();
+        if (matrix[x][end] == 1) {
+            closed.push(x);
+            return closed;
+        }
         if (x == end) {
             return closed;
         } else {
@@ -55,7 +59,7 @@ function search(matrix, start, end, isDepthFind) {
 
 console.log(search(matrix, 0, 6, false));
 
-main.textContent = `matrix - ${matrix}, ответ ${search(matrix, 0, 6, false)}`;
+main.textContent = `matrix - ${matrix}, ответ ${search(matrix, 0, 6, true)}`;
 
 </script>
 </html>
