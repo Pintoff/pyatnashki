@@ -122,14 +122,14 @@
 
     function rating(state, goal) {
       let distance = 0;
-      for (let i = 0; i < 3; i++) {
-        for (let j = 0; j < 3; j++) {
+      for (let i = 0; i < 4; i++) {
+        for (let j = 0; j < 4; j++) {
           let num = state[i][j];
           if (num === 0) continue;
           let targetRow = 0;
           let targetCol = 0;
-          for (let k = 0; k < 3; k++) {
-            for (let l = 0; l < 3; l++) {
+          for (let k = 0; k < 4; k++) {
+            for (let l = 0; l < 4; l++) {
               if (goal[k][l] === num) {
                 targetRow = k;
                 targetCol = l;
@@ -181,6 +181,7 @@
         for (let j = 0; j <= 3; j++) {
           console.log('puzzle[i][j]', puzzle[i][j]);
           if (puzzle[i][j] == 0) {
+            console.log({ row: i, col: j });
             return { row: i, col: j };
           }
         }
