@@ -6,14 +6,64 @@
     <title>Document</title>
 </head>
 <body>
+    <div class="img_wrap">
+        <img src="./графДля1.png" alt="" srcset="">
+    </div>
+    <div class="action">
+        <input type="text" placeholder="Откуда" id="from">
+        <input type="text" placeholder="Куда" id="to">
+        <fieldset>
+            <legend>Тип поиска</legend>
+            <div>
+                <input type="radio" id="depth" name="graph" value="depth" checked />
+                <label for="depth">В глубину</label>
+            </div>
+
+            <div>
+                <input type="radio" id="breadth" name="graph" value="breadth" />
+                <label for="breadth">В ширину</label>
+            </div>
+
+  
+          </fieldset>
+          
+    </div>
+
+    <button id="searchStartBtn">Найти</button>
     <div class="main">
 
     </div>
 </body>
 <script>
+
+    document.addEventListener('DOMContentLoaded', (event) => {
+        const radioButtons = document.querySelectorAll('input[name="graph"]');    
+            radioButtons.forEach((radio) => {
+                radio.addEventListener('change', (event) => {
+                    if (event.target.checked) {
+                        handleRadioChange(event.target.value);
+                    }
+                });
+            });
+        });
+
+        function handleRadioChange(value) {
+            console.log(`Выбран тип поиска: ${value}`);
+            findMethod = !findMethod;
+        }
+
+    var btn = document.getElementById('searchStartBtn');
     var main = document.querySelector('.main');
-
-
+    var findMethod = true;
+    
+    btn.addEventListener('click', function() {
+        let from = document.getElementById('from').value;
+        from -= 0;
+        let to = document.getElementById('to').value;
+        to -= 0;
+        console.log(search(matrix, from, to, findMethod));
+        main.textContent = `matrix - ${matrix}, ответ ${search(matrix, from, to, findMethod)}`;
+    })
 
     var matrix = [
     [0, 1, 1, 0, 0, 0, 0, 0, 0, 0], 
@@ -57,9 +107,6 @@ function search(matrix, start, end, isDepthFind) {
     return null;
 }
 
-console.log(search(matrix, 0, 6, false));
-
-main.textContent = `matrix - ${matrix}, ответ ${search(matrix, 0, 6, true)}`;
 
 </script>
 </html>
